@@ -2,7 +2,7 @@ import os
 import whisper
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from moviepy.editor import VideoFileClip  # تم تصحيح الخطأ الإملائي هنا
+from moviepy.editor import VideoFileClip
 import torch
 
 app = Flask(__name__)
@@ -41,9 +41,9 @@ def transcribe_video():
         print("Audio extracted successfully.")
 
         print("Starting transcription... This may take some time depending on video length.")
-        # استخدام Whisper لتحويل الصوت إلى نص
-        # fp16=False ضروري عند استخدام CPU
-        result = model.transcribe(temp_audio_path, fp16=(device == 'cuda'))
+        # ---===[[  هذا هو السطر الذي تم تعديله  ]]===---
+        result = model.transcribe(temp_audio_path, language="ar", fp16=(device == 'cuda'))
+        # ---===[[  نهاية التعديل  ]]===---
         print("Transcription complete.")
         
         # حذف الملفات المؤقتة
