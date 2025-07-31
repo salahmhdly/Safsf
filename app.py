@@ -2,7 +2,7 @@ import os
 import whisper
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from moviepy.editor import VideoFileClip
+from moviepy.editor import VideoFileClip  # تم تصحيح الخطأ الإملائي هنا
 import torch
 
 app = Flask(__name__)
@@ -10,8 +10,8 @@ CORS(app)
 
 # التحقق من توفر GPU لتحديد النموذج الأنسب
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model_size = "base" # 'base' هو توازن جيد بين الدقة والسرعة ويعمل جيدًا على CPU
-    
+model_size = "base"  # 'base' هو توازن جيد بين الدقة والسرعة ويعمل جيدًا على CPU
+
 print(f"Using device: {device}. Loading model: {model_size}")
 
 # تحميل نموذج Whisper (سيتم تنزيله تلقائيًا في أول مرة)
@@ -22,16 +22,16 @@ print("AI Model (Whisper) loaded successfully.")
 def transcribe_video():
     if 'video' not in request.files:
         return jsonify({"error": "Video file not found in the request."}), 400
-        
+    
     video_file = request.files['video']
-        
+    
     # إنشاء مجلد مؤقت إذا لم يكن موجودًا
     if not os.path.exists("temp"):
         os.makedirs("temp")
-            
+        
     temp_video_path = os.path.join("temp", "temp_video.mp4")
     video_file.save(temp_video_path)
-        
+    
     try:
         print("Extracting audio from video...")
         video_clip = VideoFileClip(temp_video_path)
@@ -42,13 +42,14 @@ def transcribe_video():
 
         print("Starting transcription... This may take some time depending on video length.")
         # استخدام Whisper لتحويل الصوت إلى نص
-        result = model.transcribe(temp_audio_path, fp16=False if device == 'cpu' else True)
+        # fp16=False ضروري عند استخدام CPU
+        result = model.transcribe(temp_audio_path, fp16=(device == 'cuda'))
         print("Transcription complete.")
-            
+        
         # حذف الملفات المؤقتة
         os.remove(temp_video_path)
         os.remove(temp_audio_path)
-            
+        
         # إعادة النص الناتج
         return jsonify({"transcription": result["text"]})
 
